@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trade Tracker & Portfolio Tools</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Trade Tracker</h1>
+        <p>Log trades, visualize portfolio growth, and model compounding.</p>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggle" class="secondary">Toggle theme</button>
+        <button id="signInBtn" class="primary">Sign in with Google</button>
+        <button id="signOutBtn" class="secondary hidden">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card" id="statusCard">
+        <h2>Account</h2>
+        <p id="authStatus">Not signed in.</p>
+      </section>
+
+      <section class="card" id="tradeFormSection">
+        <h2>Log a trade</h2>
+        <form id="tradeForm" class="grid">
+          <label>
+            Date elapsed (days)
+            <input type="number" id="dateElapsed" min="1" step="1" required />
+          </label>
+          <label>
+            Symbol
+            <input type="text" id="symbol" placeholder="AAPL" required />
+          </label>
+          <label>
+            Entry
+            <input type="number" id="entry" min="0" step="0.01" required />
+          </label>
+          <label>
+            Exit
+            <input type="number" id="exit" min="0" step="0.01" required />
+          </label>
+          <label>
+            Size (capital used)
+            <input type="number" id="size" min="0" step="0.01" required />
+          </label>
+          <label>
+            % gain (auto)
+            <input type="number" id="percentGain" readonly />
+          </label>
+          <label>
+            Annualized gain % (auto)
+            <input type="number" id="annualizedGain" readonly />
+          </label>
+          <button type="submit" class="primary">Save trade</button>
+        </form>
+        <p class="helper">% gain and annualized gain update as you edit entry/exit/date elapsed.</p>
+      </section>
+
+      <section class="card" id="tradeHistorySection">
+        <h2>Trade history</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Date elapsed</th>
+                <th>Symbol</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>Size</th>
+                <th>% gain</th>
+                <th>Annualized %</th>
+                <th>Δ vs prev %</th>
+              </tr>
+            </thead>
+            <tbody id="tradeTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Portfolio growth</h2>
+        <div class="inline-inputs">
+          <label>
+            Starting capital
+            <input type="number" id="startingCapital" min="0" step="0.01" value="10000" />
+          </label>
+        </div>
+        <canvas id="portfolioChart" height="120"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Trade progression calculator</h2>
+        <form id="progressionForm" class="grid">
+          <label>
+            Starting capital
+            <input type="number" id="progressionCapital" min="0" step="0.01" value="10000" />
+          </label>
+          <label>
+            % profit per trade
+            <input type="number" id="progressionProfit" min="-100" step="0.01" value="2" />
+          </label>
+          <label>
+            Capital allocation %
+            <input type="number" id="progressionAllocation" min="0" max="100" step="0.1" value="50" />
+          </label>
+          <label>
+            Number of trades
+            <input type="number" id="progressionTrades" min="1" step="1" value="10" />
+          </label>
+          <button type="submit" class="primary">Calculate</button>
+        </form>
+        <div class="split">
+          <div>
+            <h3>Results</h3>
+            <ul id="progressionList" class="list"></ul>
+          </div>
+          <div>
+            <canvas id="progressionChart" height="120"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Compounding calculator</h2>
+        <form id="compoundForm" class="grid">
+          <label>
+            Starting capital
+            <input type="number" id="compoundCapital" min="0" step="0.01" value="10000" />
+          </label>
+          <label>
+            Rate % per period
+            <input type="number" id="compoundRate" step="0.01" value="5" />
+          </label>
+          <label>
+            Number of periods
+            <input type="number" id="compoundPeriods" min="1" step="1" value="12" />
+          </label>
+          <button type="submit" class="primary">Calculate</button>
+        </form>
+        <div class="split">
+          <div>
+            <h3>Projection</h3>
+            <ul id="compoundList" class="list"></ul>
+          </div>
+          <div>
+            <canvas id="compoundChart" height="120"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Yahoo Finance EOD chart (optional)</h2>
+        <form id="yahooForm" class="inline-inputs">
+          <label>
+            Symbol
+            <input type="text" id="yahooSymbol" placeholder="AAPL" />
+          </label>
+          <label>
+            Range
+            <select id="yahooRange">
+              <option value="1mo">1 Month</option>
+              <option value="3mo">3 Months</option>
+              <option value="6mo">6 Months</option>
+              <option value="1y">1 Year</option>
+            </select>
+          </label>
+          <button type="submit" class="primary">Load chart</button>
+        </form>
+        <p class="helper">Data caches once per day after 5pm GMT+7.</p>
+        <canvas id="yahooChart" height="120"></canvas>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built with Supabase + Chart.js.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
