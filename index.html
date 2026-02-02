@@ -41,8 +41,8 @@
             <input type="number" id="dateElapsed" min="1" step="1" required />
           </label>
           <label>
-            Symbol
-            <input type="text" id="symbol" placeholder="AAPL" required />
+            Symbol (IDX)
+            <input type="text" id="symbol" placeholder="BBCA" required />
           </label>
           <label>
             Entry
@@ -165,8 +165,8 @@
         <h2>Yahoo Finance EOD chart (optional)</h2>
         <form id="yahooForm" class="inline-inputs">
           <label>
-            Symbol
-            <input type="text" id="yahooSymbol" placeholder="AAPL" />
+            Symbol (.JK)
+            <input type="text" id="yahooSymbol" placeholder="BBCA.JK" />
           </label>
           <label>
             Range
@@ -179,7 +179,9 @@
           </label>
           <button type="submit" class="primary">Load chart</button>
         </form>
-        <p class="helper">Data caches once per day after 5pm GMT+7.</p>
+        <p class="helper" id="yahooStatus">
+          Data caches once per day after 5pm GMT+7. Indonesian equities typically use the .JK suffix.
+        </p>
         <canvas id="yahooChart" height="120"></canvas>
       </section>
     </main>
